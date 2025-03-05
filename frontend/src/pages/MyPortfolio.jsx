@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import AddCardModal from './AddCardModal'
-import EditProfileModal from './EditProfileModal'
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import AddCardModal from '../components/AddCardModal';
+import EditProfileModal from '../components/EditProfileModal';
 
 const Card = ({ card }) => {
   return (
@@ -42,20 +43,23 @@ const AddCardButton = ({ onClick }) => {
 };
 
 function MyPortfolio() {
+  // Get user from auth context
+  const { currentUser } = useAuth();
+  
   // State for modals
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
-  // User profile state
+  // User profile state - initialized from auth context
   const [profile, setProfile] = useState({
-    name: "Mike Johnson",
-    username: "card_collector94",
-    location: "Chicago, IL",
-    bio: "Passionate card collector for over 15 years. Specializing in baseball memorabilia and rare editions. Always looking to connect with fellow collectors to share stories and potentially trade gems from our collections.",
-    profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
+    name: currentUser?.name || "Trading Card Collector",
+    username: currentUser?.username || "collector",
+    location: currentUser?.location || "Card Collectors Club",
+    bio: currentUser?.bio || "Share your story as a card collector...",
+    profileImage: currentUser?.profileImage || "https://randomuser.me/api/portraits/lego/1.jpg"
   });
   
-  // Initial card data
+  // Initial card data - this would come from an API in a real app
   const [cards, setCards] = useState([
     {
       id: 1,
@@ -105,6 +109,7 @@ function MyPortfolio() {
   // Function to handle updating profile
   const handleUpdateProfile = (updatedProfile) => {
     setProfile(updatedProfile);
+    // In a real app, you would also update this in your backend/database
   };
 
   // Modal functions
@@ -208,4 +213,4 @@ function MyPortfolio() {
   );
 }
 
-export default MyPortfolio
+export default MyPortfolio;
