@@ -1,15 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AddCardModal from '../components/AddCardModal';
 import EditProfileModal from '../components/EditProfileModal';
+import { getUserCards, deleteCard } from '../services/cardService';
 
-const Card = ({ card }) => {
+const Card = ({ card, onDelete }) => {
+  const [showActions, setShowActions] = useState(false);
+  
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 transition transform hover:-translate-y-1 hover:shadow-xl">
+    <div 
+      className="bg-white rounded-lg shadow-md p-4 border border-gray-200 transition transform hover:-translate-y-1 hover:shadow-xl relative group"
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
+    >
+      {/* Card Actions */}
+      <div 
+        className={`absolute top-2 right-2 flex space-x-1 ${
+          showActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        } transition-opacity`}
+      >
+        <button
+          onClick={() => onDelete(card.id)}
+          className="bg-red-100 hover:bg-red-200 text-red-600 p-1 rounded-full"
+          title="Delete card"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+      
       <div className="aspect-[2/3] overflow-hidden rounded-md border border-gray-300">
         <img
           src={card.image}
-          alt="Trading Card"
+          alt={card.title}
           className="w-full h-full object-cover"
         />
       </div>
@@ -59,30 +83,29 @@ function MyPortfolio() {
     profileImage: currentUser?.profileImage || "https://randomuser.me/api/portraits/lego/1.jpg"
   });
   
-  // Initial card data - this would come from an API in a real app
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
-      title: "Jackie Robinson Rookie Card",
-      value: "$100",
-      funFact: "This card was featured in a rare auction.",
-    },
-    {
-      id: 2,
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
-      title: "Jackie Robinson Limited Edition",
-      value: "$250",
-      funFact: "Limited edition with unique artwork.",
-    },
-    {
-      id: 3,
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
-      title: "Jackie Robinson Heritage",
-      value: "$75",
-      funFact: "This card has an interesting backstory in the trading community.",
-    },
-  ]);
+  // State for cards
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch user's cards on component mount
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        setLoading(true);
+        const cardsData = await getUserCards();
+        setCards(cardsData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching cards:', err);
+        setError('Failed to load cards. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCards();
+  }, []);
 
   // Calculate total collection value
   const calculateTotalValue = () => {
@@ -103,7 +126,20 @@ function MyPortfolio() {
   
   // Function to handle adding a new card
   const handleAddCard = (newCard) => {
-    setCards([...cards, newCard]);
+    setCards(prevCards => [...prevCards, newCard]);
+  };
+  
+  // Function to handle deleting a card
+  const handleDeleteCard = async (cardId) => {
+    if (window.confirm('Are you sure you want to delete this card?')) {
+      try {
+        await deleteCard(cardId);
+        setCards(prevCards => prevCards.filter(card => card.id !== cardId));
+      } catch (err) {
+        console.error('Error deleting card:', err);
+        alert('Failed to delete card. Please try again.');
+      }
+    }
   };
   
   // Function to handle updating profile
@@ -186,14 +222,35 @@ function MyPortfolio() {
           <span className="text-gray-600">{cards.length} cards</span>
         </div>
         
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.map((card) => (
-            <Card key={card.id} card={card} />
-          ))}
-          
-          {/* Add Card Button */}
-          <AddCardButton onClick={openCardModal} />
-        </section>
+        {/* Cards Section */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-800 rounded p-4 mb-6">
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-2 text-blue-600 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card) => (
+              <Card 
+                key={card.id} 
+                card={card} 
+                onDelete={handleDeleteCard}
+              />
+            ))}
+            
+            {/* Add Card Button */}
+            <AddCardButton onClick={openCardModal} />
+          </section>
+        )}
       </main>
       
       {/* Modals */}

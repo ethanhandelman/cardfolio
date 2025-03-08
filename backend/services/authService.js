@@ -41,6 +41,7 @@ async function registerUser(userData) {
     location: userData.location || '',
     bio: userData.bio || '',
     profileImage: userData.profileImage || 'https://randomuser.me/api/portraits/lego/1.jpg',
+    cards: [], // Initialize empty cards array
     createdAt: new Date(),
     updatedAt: new Date()
   };
