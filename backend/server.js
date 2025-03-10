@@ -5,6 +5,7 @@ const { connectToDB } = require('./db/config');
 const { ensureDirectories } = require('./utils/imageUtils');
 const authRoutes = require('./routes/auth');
 const cardRoutes = require('./routes/cards');
+const userRoutes = require('./routes/users');
 
 // Load environment variables
 require('dotenv').config();
@@ -16,11 +17,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Log the exact path being used
+const uploadsPath = path.join(__dirname, 'uploads');
+console.log('Serving static files from:', uploadsPath);
+app.use('/uploads', express.static(uploadsPath));
 
 // Connect to MongoDB and set up directories before starting server
 async function startServer() {
@@ -34,10 +41,26 @@ async function startServer() {
     // Routes
     app.use('/auth', authRoutes);
     app.use('/api/cards', cardRoutes);
+    app.use('/api/users', userRoutes);
     
     // Test route
     app.get('/', (req, res) => {
       res.json({ message: 'Cardfolio API is running' });
+    });
+    
+    // Debug route to list all files in uploads/cards directory
+    app.get('/debug/uploads', (req, res) => {
+      const fs = require('fs');
+      try {
+        const files = fs.readdirSync(path.join(__dirname, 'uploads/cards'));
+        res.json({
+          uploadsPath: path.join(__dirname, 'uploads/cards'),
+          files: files,
+          urls: files.map(file => `${req.protocol}://${req.get('host')}/uploads/cards/${file}`)
+        });
+      } catch (error) {
+        res.json({ error: error.message });
+      }
     });
     
     // Error handling middleware

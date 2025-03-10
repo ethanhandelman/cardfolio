@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAbsoluteImageUrl } from '../services/userService';
 
 const UserCard = ({ user }) => {
   return (
@@ -12,15 +13,17 @@ const UserCard = ({ user }) => {
             className="w-16 h-16 rounded-full border-2 border-gray-200 object-cover"
           />
           <div>
-            <h3 className="text-xl font-bold text-gray-800">{user.name}</h3>
+            <h3 className="text-xl font-bold text-gray-800">{user.name || user.username}</h3>
             <p className="text-gray-600 mb-2">@{user.username}</p>
-            <div className="flex items-center text-gray-700 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>{user.location}</span>
-            </div>
+            {user.location && (
+              <div className="flex items-center text-gray-700 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{user.location}</span>
+              </div>
+            )}
           </div>
         </div>
         
@@ -41,13 +44,15 @@ const UserCard = ({ user }) => {
           </div>
         </div>
         
-        <div className="mt-4 flex flex-wrap gap-1">
-          {user.topCategories.map((category, index) => (
-            <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
-              {category}
-            </span>
-          ))}
-        </div>
+        {user.topCategories && user.topCategories.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1">
+            {user.topCategories.map((category, index) => (
+              <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-700">
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -82,7 +87,7 @@ function Browse() {
       name: "Mike Johnson",
       username: "card_collector94",
       location: "Chicago, IL",
-      profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/men/32.jpg"),
       cardCount: 127,
       value: "$12.4k",
       joined: "2020",
@@ -93,7 +98,7 @@ function Browse() {
       name: "Alex Thompson",
       username: "card_master",
       location: "New York, NY",
-      profileImage: "https://randomuser.me/api/portraits/men/44.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/men/44.jpg"),
       cardCount: 89,
       value: "$8.2k",
       joined: "2019",
@@ -104,7 +109,7 @@ function Browse() {
       name: "Sarah Parker",
       username: "vintage_collector",
       location: "San Francisco, CA",
-      profileImage: "https://randomuser.me/api/portraits/women/33.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/women/33.jpg"),
       cardCount: 215,
       value: "$23.5k",
       joined: "2018",
@@ -115,7 +120,7 @@ function Browse() {
       name: "James Wilson",
       username: "sports_cards_only",
       location: "Dallas, TX",
-      profileImage: "https://randomuser.me/api/portraits/men/62.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/men/62.jpg"),
       cardCount: 156,
       value: "$18.9k",
       joined: "2021",
@@ -126,7 +131,7 @@ function Browse() {
       name: "Emily Rodriguez",
       username: "trading_queen",
       location: "Miami, FL",
-      profileImage: "https://randomuser.me/api/portraits/women/55.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/women/55.jpg"),
       cardCount: 94,
       value: "$7.3k",
       joined: "2022",
@@ -137,7 +142,7 @@ function Browse() {
       name: "David Lee",
       username: "rare_finds",
       location: "Seattle, WA",
-      profileImage: "https://randomuser.me/api/portraits/men/76.jpg",
+      profileImage: getAbsoluteImageUrl("https://randomuser.me/api/portraits/men/76.jpg"),
       cardCount: 67,
       value: "$30.2k",
       joined: "2017",
@@ -152,30 +157,46 @@ function Browse() {
       title: "Mickey Mantle 1952 Topps",
       value: "$500",
       owner: "card_master",
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
+      image: getAbsoluteImageUrl("https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg"),
     },
     {
       id: 2,
       title: "Magic: The Gathering Alpha",
       value: "$1,200",
       owner: "vintage_collector",
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
+      image: getAbsoluteImageUrl("https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg"),
     },
     {
       id: 3,
       title: "Pokemon First Edition",
       value: "$850",
       owner: "vintage_collector",
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
+      image: getAbsoluteImageUrl("https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg"),
     },
     {
       id: 4,
       title: "Jackie Robinson Rookie",
       value: "$425",
       owner: "card_collector94",
-      image: "https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg",
+      image: getAbsoluteImageUrl("https://images.fineartamerica.com/images/artworkimages/medium/3/jackie-robinson-baseball-card-restored-and-enhanced-20230622-wingsdomain-art-and-photography.jpg"),
     }
   ]);
+
+  // Update to include real users (you'd fetch this data from API)
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       // Fetch users from your API here
+  //       // const response = await fetch('http://localhost:5000/api/users');
+  //       // const data = await response.json();
+  //       // setUsers(data.users);
+  //     } catch (error) {
+  //       console.error('Error fetching users:', error);
+  //     }
+  //   };
+  //   
+  //   fetchUsers();
+  // }, []);
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans pt-16">
@@ -220,4 +241,4 @@ function Browse() {
   );
 }
 
-export default Browse
+export default Browse;

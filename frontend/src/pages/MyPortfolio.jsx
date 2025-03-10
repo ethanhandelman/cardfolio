@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AddCardModal from '../components/AddCardModal';
 import EditProfileModal from '../components/EditProfileModal';
 import { getUserCards, deleteCard } from '../services/cardService';
+import { getAbsoluteImageUrl } from '../services/userService';
 
 const Card = ({ card, onDelete }) => {
   const [showActions, setShowActions] = useState(false);
@@ -32,7 +33,7 @@ const Card = ({ card, onDelete }) => {
       
       <div className="aspect-[2/3] overflow-hidden rounded-md border border-gray-300">
         <img
-          src={card.image}
+          src={getAbsoluteImageUrl(card.image)}
           alt={card.title}
           className="w-full h-full object-cover"
         />
@@ -80,7 +81,7 @@ function MyPortfolio() {
     username: currentUser?.username || "collector",
     location: currentUser?.location || "Card Collectors Club",
     bio: currentUser?.bio || "Share your story as a card collector...",
-    profileImage: currentUser?.profileImage || "https://randomuser.me/api/portraits/lego/1.jpg"
+    profileImage: getAbsoluteImageUrl(currentUser?.profileImage) || "https://randomuser.me/api/portraits/lego/1.jpg"
   });
   
   // State for cards
@@ -94,7 +95,14 @@ function MyPortfolio() {
       try {
         setLoading(true);
         const cardsData = await getUserCards();
-        setCards(cardsData);
+        
+        // Process cards to fix image URLs
+        const processedCards = cardsData.map(card => ({
+          ...card,
+          image: getAbsoluteImageUrl(card.image)
+        }));
+        
+        setCards(processedCards);
         setError(null);
       } catch (err) {
         console.error('Error fetching cards:', err);
@@ -111,7 +119,7 @@ function MyPortfolio() {
   const calculateTotalValue = () => {
     return cards.reduce((total, card) => {
       // Extract numeric value from string (remove $ and any commas)
-      const value = parseFloat(card.value.replace(/[$,]/g, '')) || 0;
+      const value = parseFloat((card.value || '0').replace(/[$,]/g, '')) || 0;
       return total + value;
     }, 0);
   };
@@ -126,7 +134,12 @@ function MyPortfolio() {
   
   // Function to handle adding a new card
   const handleAddCard = (newCard) => {
-    setCards(prevCards => [...prevCards, newCard]);
+    // Fix image URL
+    const processedCard = {
+      ...newCard,
+      image: getAbsoluteImageUrl(newCard.image)
+    };
+    setCards(prevCards => [...prevCards, processedCard]);
   };
   
   // Function to handle deleting a card
@@ -144,7 +157,10 @@ function MyPortfolio() {
   
   // Function to handle updating profile
   const handleUpdateProfile = (updatedProfile) => {
-    setProfile(updatedProfile);
+    setProfile({
+      ...updatedProfile,
+      profileImage: getAbsoluteImageUrl(updatedProfile.profileImage)
+    });
     // In a real app, you would also update this in your backend/database
   };
 
