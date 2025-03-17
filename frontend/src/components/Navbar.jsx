@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchUsername, setSearchUsername] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -26,6 +27,16 @@ function Navbar() {
     closeMenu();
   };
   
+  // Handle search submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchUsername.trim()) {
+      navigate(`/portfolio/${searchUsername.trim()}`);
+      setSearchUsername('');
+      closeMenu();
+    }
+  };
+  
   // Active link style
   const activeLink = "text-amber-600 font-semibold";
   const normalLink = "text-gray-600 hover:text-blue-700";
@@ -38,6 +49,24 @@ function Navbar() {
           <Link to="/" className="flex items-center" onClick={closeMenu}>
             <span className="text-2xl font-bold text-blue-900">Cardfolio</span>
           </Link>
+          
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:block w-1/3 mx-4">
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                placeholder="Search by username..."
+                value={searchUsername}
+                onChange={(e) => setSearchUsername(e.target.value)}
+                className="w-full py-1.5 pl-10 pr-4 text-gray-700 bg-gray-100 rounded-md focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </form>
+          </div>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8">
@@ -128,6 +157,30 @@ function Navbar() {
       
       {/* Mobile Menu */}
       <div className={`md:hidden bg-white shadow-md ${isMenuOpen ? 'block' : 'hidden'}`}>
+        {/* Mobile Search */}
+        <div className="px-4 py-2">
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              placeholder="Search by username..."
+              value={searchUsername}
+              onChange={(e) => setSearchUsername(e.target.value)}
+              className="w-full py-2 pl-10 pr-4 text-gray-700 bg-gray-100 rounded-md focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <button
+              type="submit"
+              className="absolute inset-y-0 right-0 flex items-center pr-3"
+            >
+              <span className="text-sm text-blue-600 font-medium">Search</span>
+            </button>
+          </form>
+        </div>
+        
         <div className="px-2 pt-2 pb-3 space-y-1">
           <NavLink 
             to="/browse" 
