@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -38,13 +38,13 @@ async function startServer() {
     // Ensure upload directories exist
     await ensureDirectories();
     
-    // API Routes - make sure these come BEFORE the static frontend serving
+    // Routes
     app.use('/auth', authRoutes);
     app.use('/api/cards', cardRoutes);
     app.use('/api/users', userRoutes);
     
-    // Test route - changed from '/' to '/api' to avoid conflict with frontend routes
-    app.get('/api', (req, res) => {
+    // Test route
+    app.get('/', (req, res) => {
       res.json({ message: 'Cardfolio API is running' });
     });
     
@@ -61,16 +61,6 @@ async function startServer() {
       } catch (error) {
         res.json({ error: error.message });
       }
-    });
-    
-    // Serve static files from the React build directory
-    const frontendBuildPath = path.join(__dirname, '../frontend/dist');
-    console.log('Serving frontend static files from:', frontendBuildPath);
-    app.use(express.static(frontendBuildPath));
-    
-    // Catch-all route to serve the React app for client-side routing
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(frontendBuildPath, 'index.html'));
     });
     
     // Error handling middleware
