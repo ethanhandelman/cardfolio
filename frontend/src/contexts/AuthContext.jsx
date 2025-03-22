@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 const AuthContext = createContext();
 
 // API URL - change this to match your backend URL
-const API_URL = 'http://localhost:9999';
+const API_URL = 'http://localhost:3000';
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);

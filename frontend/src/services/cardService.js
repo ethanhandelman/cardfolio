@@ -1,5 +1,5 @@
 // API URL - change this to match your backend URL
-const API_URL = 'http://localhost:9999';
+const API_URL = 'http://localhost:3000';
 
 /**
  * Get auth header with token
